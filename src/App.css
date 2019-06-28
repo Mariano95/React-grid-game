@@ -1,9 +1,9 @@
 body {
-	background: rgb(28, 34, 64);
+	background: rgb(35, 47, 90);
 	justify-content: center;
 }
 
-.another {
+.MainContainer {
 	align-items: center;
 	justify-content: center;
 	display: flex;
@@ -80,7 +80,6 @@ body {
 	justify-content: space-between;
 	align-items: center;
 
-	border: 3px solid black;
 }
 
 .ResetContainer{
@@ -91,3 +90,15 @@ body {
 	align-items: center;
 	height: 20%;
 }
+
+.GameResultContainer{
+	height: 100px;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-items: center;
+	justify-content: center;
+	font-size: 3.8vw;
+	color: white;
+}	

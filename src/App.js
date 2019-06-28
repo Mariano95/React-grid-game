@@ -18,38 +18,17 @@ export default class App extends React.Component {
 			players: {1: {name: "Doge", wins: 0},
 					  2: {name: "Evil doge", wins: 0}},
 			playingPlayer: 1,
-			winner: false
+			game_ended: false,
+			tokensQty: 0
 		};
 		this.state = initial_state;
 		this.reset = this.reset.bind(this);
 		this.clicking = false;
-		this.tokens = 0;
-	}
-
-	handleClick = (row, col) => {
-		if (this.clicking) {
-			return;
-		}
-
-		if (this.state.winner == false){
-			let board = [ ...this.state.board ];
-			let values = Object.keys(this.state.cases);
-			if (board[row][col] == 0){
-				board[row][col] = parseInt(values[this.state.playingPlayer]);
-				this.clicking = true;
-				this.setState({ board }, () => { 
-					this.clicking = false;
-				});
-				this.tokens += 1;
-				this.winnerExists();
-				this.game();
-			}
-		}
 	};
 
 	render() {
 		return(
-			<div className="another">
+			<div className="MainContainer">
 
 				<div className="PlayerBoard">
 					{this.state.players[1].name}
@@ -65,7 +44,9 @@ export default class App extends React.Component {
 						<input type="button" value="RESET BOARD" onClick={this.reset}></input>
 					</div>
 					<Grid handleClick={this.handleClick} cases={this.state.cases} board={this.state.board} /> 
-					<h1>{this.showWinner()}</h1>
+					<div className="GameResultContainer">
+						{this.showWinner()}
+					</div>
 				</div>
 				
 
@@ -77,68 +58,94 @@ export default class App extends React.Component {
 				</div>
 			</div>
 		)
-	}
+	};
 
-	winnerExists(){
-		if(this.state.board[0][0]==this.state.board[1][1] && this.state.board[1][1]==this.state.board[2][2] && this.state.board[2][2]!=0) {
-			this.winner()
+	handleClick = (row, col) => {
+		if (this.clicking) {
+			return;
 		}
 
-		if(this.state.board[0][2]==this.state.board[1][1] && this.state.board[1][1]==this.state.board[2][0] && this.state.board[2][0]!=0) {
-			this.winner()
+		if (this.state.game_ended === false){
+			let board = [ ...this.state.board ];
+			let values = Object.keys(this.state.cases);
+			if (board[row][col] === 0){
+				board[row][col] = parseInt(values[this.state.playingPlayer]);
+				this.clicking = true;
+				this.setState({ board }, () => { 
+					this.clicking = false;
+				});
+				let new_tokens_qty = this.state.tokensQty;
+				new_tokens_qty += 1;
+				this.setState( {tokensQty: new_tokens_qty} );
+				this.winnerExists();
+				this.game();
+			}
+		}
+	};
+
+	game(){
+		if(this.state.playingPlayer === 1){
+			this.setState({playingPlayer: 2});
+		}
+		else{
+			this.setState({playingPlayer: 1});
+		}
+	};
+
+	winnerExists(){
+		if(this.state.board[0][0]===this.state.board[1][1] && this.state.board[1][1]===this.state.board[2][2] && this.state.board[2][2]!==0) {
+			this.endGame();
+		}
+
+		if(this.state.board[0][2]===this.state.board[1][1] && this.state.board[1][1]===this.state.board[2][0] && this.state.board[2][0]!==0) {
+			this.endGame();
 		}
 
 		[0, 1, 2].map( (i) => { 
-			if(this.state.board[0][i]==this.state.board[1][i] && this.state.board[1][i]==this.state.board[2][i] && this.state.board[2][i]!=0) {
-				this.winner()
+			if(this.state.board[0][i]===this.state.board[1][i] && this.state.board[1][i]===this.state.board[2][i] && this.state.board[2][i]!==0) {
+				this.endGame();
 			} 
+			return 1;
 		})
 		
 		this.state.board.map( (row) => { 
-			if(row[0]==row[1] && row[1]==row[2] && row[2]!=0) {
-				this.winner()
+			if(row[0]===row[1] && row[1]===row[2] && row[2]!==0) {
+				this.endGame();
 			} 
+			return 1;
 		})
-	}
+	};
 
-	winner(){
-		this.setState({winner: true});
+	endGame(){
+		this.setState({game_ended: true});
 		let p = this.state.players;
-		p[this.state.playingPlayer].wins += 1
+		p[this.state.playingPlayer].wins += 1;
 		this.setState({players: p});
-	}
-
-	game(){
-		if(this.state.playingPlayer == 1){
-			this.setState({playingPlayer: 2})
-		}
-		else{
-			this.setState({playingPlayer: 1})
-		}
-	}
+	};
 
 	showWinner(){
-		if (this.state.winner){
+		if (this.state.game_ended){
+			let winner_key = Object.keys(this.state.players).filter( (el) => { return parseInt(el) !== this.state.playingPlayer} );
 			return(
-			this.state.players[this.state.playingPlayer].name + " loses"
-			)
+			this.state.players[winner_key].name + " wins"
+			);
 		}
 		else{
-			if (this.tokens >= 9 && this.state.winner == false){
+			if (this.state.tokensQty >= 9 && this.state.game_ended === false){
 				return(
 				"DRAW"
-				)
+				);
 			}
 		}
-	}
+	};
 
 	reset(){
 		this.setState({
 			board: [ [ 0, 0, 0,], [ 0, 0, 0], [ 0, 0, 0] ],
-			winner: false,
+			game_ended: false,
+			tokensQty: 0
 
 		})
-		this.tokens = 0;
-	}
-}
+	};
+};
 
